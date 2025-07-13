@@ -1,28 +1,25 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+)
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ erro: 'Método não permitido' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ erro: 'Método não permitido' })
 
-  const { nome, email, senha } = req.body;
+  const { nome, email, senha } = req.body
 
   if (!nome || !email || !senha) {
-    return res.status(400).json({ erro: 'Dados incompletos' });
+    return res.status(400).json({ erro: 'Preencha todos os campos' })
   }
 
-  const userFile = path.join(process.cwd(), 'users', `${email}.json`);
+  const { error } = await supabase
+    .from('usuarios')
+    .insert([{ nome, email, senha }])
 
-  try {
-    // Verifica se usuário já existe
-    await fs.access(userFile);
-    return res.status(409).json({ erro: 'Usuário já existe' });
-  } catch {
-    // Se não existe, cria arquivo
-    const userData = { nome, email, senha };
-    await fs.mkdir(path.join(process.cwd(), 'users'), { recursive: true });
-    await fs.writeFile(userFile, JSON.stringify(userData, null, 2), 'utf8');
-    return res.status(201).json({ msg: 'Usuário registrado com sucesso' });
-  }
+  if (error) return res.status(500).json({ erro: 'Erro ao registrar usuário' })
+
+  res.status(201).json({ msg: 'Usuário registrado com sucesso' })
 }
+

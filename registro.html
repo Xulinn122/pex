@@ -65,13 +65,15 @@
     <a href="index.html">Já tem conta? Fazer login</a>
   </div>
 <script>
-  const form = document.getElementById('registerForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
+  async function registrar() {
     const nome = document.getElementById('nome').value;
     const email = document.getElementById('email').value;
     const senha = document.getElementById('senha').value;
+
+    if (!nome || !email || !senha) {
+      alert('Preencha todos os campos!');
+      return;
+    }
 
     try {
       const res = await fetch('/api/register', {
@@ -83,15 +85,15 @@
       const data = await res.json();
 
       if (res.ok) {
-        alert('Registrado com sucesso!');
-        window.location.href = '/index.html';
+        alert('Registrado com sucesso! Faça login.');
+        window.location.href = 'index.html';
       } else {
-        alert('Erro: ' + data.erro);
+        alert(data.erro || 'Erro ao registrar');
       }
-    } catch {
-      alert('Erro ao conectar com o servidor');
+    } catch (err) {
+      alert('Erro de conexão com servidor.');
     }
-  });
+  }
 </script>
 </body>
 </html>
