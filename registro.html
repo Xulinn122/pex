@@ -64,25 +64,34 @@
     <button onclick="registrar()">Registrar</button>
     <a href="index.html">Já tem conta? Fazer login</a>
   </div>
+<script>
+  const form = document.getElementById('registerForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  <script>
-    function registrar() {
-      const nome = document.getElementById('nome').value
-      const email = document.getElementById('email').value
-      const senha = document.getElementById('senha').value
+    const nome = document.getElementById('nome').value;
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
 
-      if (!nome || !email || !senha) {
-        alert('Preencha todos os campos!')
-        return
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email, senha }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Registrado com sucesso!');
+        window.location.href = '/index.html';
+      } else {
+        alert('Erro: ' + data.erro);
       }
-
-      // Armazena no localStorage como simulação de banco
-      const usuario = { nome, email, senha }
-      localStorage.setItem('usuario_' + email, JSON.stringify(usuario))
-
-      alert('Registrado com sucesso! Agora faça login.')
-      window.location.href = 'index.html'
+    } catch {
+      alert('Erro ao conectar com o servidor');
     }
-  </script>
+  });
+</script>
 </body>
 </html>
